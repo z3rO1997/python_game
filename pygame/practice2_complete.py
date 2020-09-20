@@ -1,34 +1,34 @@
 import pygame
 import os
-# 기본적인 초기화 (반드시 하는 것)
-pygame.init() # 초기화 (반드시 필요)
+#Basic init (must do)
+pygame.init() # init
 
-# 화면 크기 설정
-screen_width = 640 # 가로
-screen_height = 480 # 세로
+#Screen size setting
+screen_width = 640 # width
+screen_height = 480 # height
 screen = pygame.display.set_mode((screen_width, screen_height))
 
-# 화면 타이틀 설정
-pygame.display.set_caption("shot balloons") # 게임 이름
+#Screen title setting
+pygame.display.set_caption("shot balloons")#game name
 
-# FPS
+#FPS
 clock = pygame.time.Clock()
 
 
 
-# 1. 사용자 게임 초기화 (배경 화면, 게임 이미지, 좌표, 속도, 폰트 등)
-current_path = os.path.dirname(__file__) # 현재 파일 위치
-image_path = os.path.join(current_path, "images") # images 폴더 위치 반환
+# User game init (background, game image, location, speed, font, etc.)
+current_path = os.path.dirname(__file__)#Current file location
+image_path = os.path.join(current_path, "images")#images Return folder location
 
-#배경
+#background
 background = pygame.image.load(os.path.join(image_path, "background2.png"))
 
-#스테이지
+#stage
 stage = pygame.image.load(os.path.join(image_path, "stage2.png"))
 stage_size = stage.get_rect().size
-stage_hight = stage_size[1] # 스테이지  높이 위에 캐릭터 배치
+stage_hight = stage_size[1]
 
-# 캐릭터
+#Character
 character = pygame.image.load(os.path.join(image_path, "character2.png"))
 character_size = character.get_rect().size
 character_width = character_size[0]
@@ -40,18 +40,15 @@ character_to_x_LEFT=0
 character_to_x_RIGHT=0
 character_speed = 5
 
-# 무기
+#weapon
 weapon = pygame.image.load(os.path.join(image_path, "weapon2.png"))
 weapon_size = weapon.get_rect().size
 weapon_width = weapon_size[0]
 
-# 무기는 여러번 발사 가능
 weapons = []
-
-# 무기 속도
 weapon_spead = 10
 
-# 공 만들기 (크기에 따라 따로 처리)
+#ball (separately to size)
 ball_images = [
     pygame.image.load(os.path.join(image_path, "balloon1_2.png")),
     pygame.image.load(os.path.join(image_path, "balloon2_2.png")),
@@ -59,31 +56,29 @@ ball_images = [
     pygame.image.load(os.path.join(image_path, "balloon4_2.png"))
 ]
 
-# 공 크기에 따른 최초 스피드
+#speed on size
 ball_speed_y = [-18, -15, -12, -9]
-
-# 공들
 balls = []
 
-balls.append({ #최초의 공 추가
-    "pos_x" : 50, # 공 x좌표
-    "pos_y" : 50, # 공 y좌표
-    "img_idx" : 0, # 공의 이미지 인덱스
-    "to_x" : 3, # x축 이동방향 -3은 왼쪽 3은 오른쪽
-    "to_y" : -6, # y축 이동방향
-    "init_spd_y" : ball_speed_y[0] # 최초 스피드
+balls.append({#Add first ball
+    "pos_x" : 50,#Ball x location
+    "pos_y" : 50,#Ball y location
+    "img_idx" : 0,#Ball image index
+    "to_x" : 3,#x move -3 is left and 3 is right
+    "to_y" : -6,#y move 
+    "init_spd_y" : ball_speed_y[0]#init speed
 })
 
-# 사라질 무기, 공 정보 저장
+#remove disappear, ball
 weapon_to_remove = -1
 ball_to_remove = -1
 
 #font
 game_font = pygame.font.Font(None, 40)
 total_time = 99
-start_ticks = pygame.time.get_ticks() # 시작 시간
+start_ticks = pygame.time.get_ticks()#Start time 
 
-# 게임 종료 메시지
+#message
 game_result = "Game Over"
 
 
@@ -91,17 +86,17 @@ running = True
 while running:
     dt = clock.tick(30) 
 
-    # 2. 이벤트 처리 (키보드, 마우스)
+    #Event handling
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             running = False 
         
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT: #왼쪽
+            if event.key == pygame.K_LEFT:#left
                 character_to_x_LEFT -= character_speed
-            elif event.key == pygame.K_RIGHT:  #오른쪽
+            elif event.key == pygame.K_RIGHT:#right
                 character_to_x_RIGHT += character_speed
-            elif event.key == pygame.K_SPACE: #스페이스바
+            elif event.key == pygame.K_SPACE:#spacebar
                 weapon_x_pos = character_x_pos + (character_width / 2) - (weapon_width / 2)
                 weapon_y_pos = character_y_pos
                 weapons.append([weapon_x_pos, weapon_y_pos])
@@ -115,7 +110,7 @@ while running:
 
 
 
-    # 3. 게임 캐릭터 위치 정의
+    #Character location
     character_x_pos += character_to_x_LEFT + character_to_x_RIGHT
     
     if character_x_pos < 0:
@@ -123,11 +118,11 @@ while running:
     elif character_x_pos > (screen_width - character_width):
         character_x_pos = (screen_width - character_width)
 
-    # 무기 위치 조정
-    weapons = [ [w[0], w[1] - weapon_spead] for w in weapons] # 무기를 위로 발사
+    #weapons location
+    weapons = [ [w[0], w[1] - weapon_spead] for w in weapons] # shot weapons 
     weapons = [ [w[0], w[1]] for w in weapons if w[1] > 0]
 
-    # 공 위치 정의
+    #ball location
     for ball_idx, ball_val in enumerate(balls):
         ball_pos_x = ball_val["pos_x"]
         ball_pos_y = ball_val["pos_y"]
@@ -149,13 +144,13 @@ while running:
         ball_val["pos_y"] += ball_val["to_y"]
 
 
-    # 4. 충돌 처리
-    #캐릭터 rect 정보 업데이트
+    #Conflict handling
+    #character_rect update
     character_rect = character.get_rect()
     character_rect.left = character_x_pos
     character_rect.top = character_y_pos
 
-    # 공 rect 정보 업데이트
+    #ball_rect update
     for ball_idx, ball_val in enumerate(balls):
         ball_pos_x = ball_val["pos_x"]
         ball_pos_y = ball_val["pos_y"]
@@ -180,34 +175,34 @@ while running:
                 weapon_to_remove = w_idx
                 ball_to_remove = ball_idx
 
-                # 가장 작은 공이 아니면 나뉜다
+                # division ball
                 if ball_img_idx < 3:
-                    #현재 공의 정보
+                    #ball infor
                     ball_width = ball_rect.size[0]
                     ball_height = ball_rect.size[1]
 
-                    #나눈 공 정보
+                    #divid ball infor
                     small_ball_rect = ball_images[ball_img_idx + 1].get_rect()
                     small_ball_width = small_ball_rect.size[0]
                     small_ball_height = small_ball_rect.size[1]
 
-                    # 왼쪽 방향
+                    #left
                     balls.append({
-                        "pos_x" : ball_pos_x + (ball_width / 2) - (small_ball_width / 2), # 공 x좌표
-                        "pos_y" : ball_pos_y + (ball_height / 2) - (small_ball_height / 2), # 공 y좌표
-                        "img_idx" : ball_img_idx + 1, # 공의 이미지 인덱스
-                        "to_x" : -3, # x축 이동방향 
-                        "to_y" : -6, # y축 이동방향
-                        "init_spd_y" : ball_speed_y[ball_img_idx + 1] # 최초 스피드
+                        "pos_x" : ball_pos_x + (ball_width / 2) - (small_ball_width / 2),
+                        "pos_y" : ball_pos_y + (ball_height / 2) - (small_ball_height / 2),
+                        "img_idx" : ball_img_idx + 1,
+                        "to_x" : -3, 
+                        "to_y" : -6,
+                        "init_spd_y" : ball_speed_y[ball_img_idx + 1]
                     })
-                    # 오른쪽 방향
+                    #right
                     balls.append({
-                        "pos_x" : ball_pos_x + (ball_width / 2) - (small_ball_width / 2), # 공 x좌표
-                        "pos_y" : ball_pos_y + (ball_height / 2) - (small_ball_height / 2), # 공 y좌표
-                        "img_idx" : ball_img_idx + 1, # 공의 이미지 인덱스
-                        "to_x" : 3, # x축 이동방향 
-                        "to_y" : -6, # y축 이동방향
-                        "init_spd_y" : ball_speed_y[ball_img_idx + 1] # 최초 스피드
+                        "pos_x" : ball_pos_x + (ball_width / 2) - (small_ball_width / 2),
+                        "pos_y" : ball_pos_y + (ball_height / 2) - (small_ball_height / 2),
+                        "img_idx" : ball_img_idx + 1,
+                        "to_x" : 3,
+                        "to_y" : -6,
+                        "init_spd_y" : ball_speed_y[ball_img_idx + 1]
                     })
 
                 break
@@ -216,7 +211,7 @@ while running:
         break
 
 
-    # 충돌한 공 및 무기 삭제
+    #Delete collided balls and weapons
     if ball_to_remove > -1:
         del balls[ball_to_remove]
         ball_to_remove = -1
@@ -225,12 +220,12 @@ while running:
         del weapons[weapon_to_remove]
         weapon_to_remove = -1
 
-    # 모든 공 삭제 성공
+    #shot all balls
     if len(balls) == 0:
         game_result = "Mission Complete"
         running = False
 
-    # 5. 화면에 그리기
+    #bulid screen
     screen.blit(background, (0, 0))
 
     for weapon_x_pos, weapon_y_pos in weapons:
@@ -245,12 +240,12 @@ while running:
     screen.blit(character, (character_x_pos, character_y_pos))
 
 
-    # 시간 계산
+    #Time calculation
     elapsed_time = (pygame.time.get_ticks() - start_ticks) / 1000
     timer = game_font.render("Time : {0}".format(int(total_time - elapsed_time)), True, (0,0,0,))
     screen.blit(timer, (10, 10))
 
-    # 시간 초과
+    #Time out
     if total_time - elapsed_time <= 0:
         game_result = "Time Over"
         running = False
@@ -258,14 +253,14 @@ while running:
 
     pygame.display.update() 
 
-#게임 오브 메시지 저장
+#bulid Game over Messages
 msg = game_font.render(game_result, True, (255, 0, 0))
 msg_rect = msg.get_rect(center = (int(screen_width / 2), int(screen_height / 2)))
 screen.blit(msg, msg_rect)
 pygame.display.update()
 
-# 잠시 대기
-pygame.time.delay(2000) # 2초의 대기 (ms)
+# delay
+pygame.time.delay(2000) # 2scond (ms)
 
-# pygame 종료
+# pygame End
 pygame.quit()
